@@ -1,0 +1,134 @@
+function createEvaluator(expr) {
+  const scope = {
+    sin: Math.sin,
+    cos: Math.cos,
+    tan: Math.tan,
+    log: Math.log,
+    exp: Math.exp,
+    sqrt: Math.sqrt,
+    abs: Math.abs,
+    pi: Math.PI,
+    e: Math.E
+  };
+
+  const normalized = expr.replace(/\^/g, "**");
+  const argNames = Object.keys(scope).concat("x");
+  const argValues = Object.values(scope);
+
+  let fn = new Function(...argNames, `return (${normalized});`);
+  return x => fn(...argValues, x);
+}
+
+const canvas = document.getElementById("graph");
+const ctx = canvas.getContext("2d");
+
+function worldToScreen(x, y, win) {
+  return {
+    sx: ((x - win.xmin) / (win.xmax - win.xmin)) * canvas.width,
+    sy: canvas.height - ((y - win.ymin) / (win.ymax - win.ymin)) * canvas.height
+  };
+}
+
+function drawGrid(win) {
+  ctx.fillStyle = "#020617";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.strokeStyle = "#1f2937";
+  ctx.lineWidth = 1;
+
+  for (let x = Math.ceil(win.xmin); x <= win.xmax; x++) {
+    const { sx } = worldToScreen(x, 0, win);
+    ctx.beginPath();
+    ctx.moveTo(sx, 0);
+    ctx.lineTo(sx, canvas.height);
+    ctx.stroke();
+  }
+
+  for (let y = Math.ceil(win.ymin); y <= win.ymax; y++) {
+    const { sy } = worldToScreen(0, y, win);
+    ctx.beginPath();
+    ctx.moveTo(0, sy);
+    ctx.lineTo(canvas.width, sy);
+    ctx.stroke();
+  }
+}
+
+function drawFunction(fn, win) {
+  ctx.strokeStyle = "#38bdf8";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+
+  let first = true;
+  const steps = canvas.width * 2;
+  const dx = (win.xmax - win.xmin) / steps;
+
+  for (let i = 0; i <= steps; i++) {
+    const x = win.xmin + i * dx;
+    let y = fn(x);
+
+    if (!isFinite(y)) {
+      first = true;
+      continue;
+    }
+
+    const { sx, sy } = worldToScreen(x, y, win);
+
+    if (first) {
+      ctx.moveTo(sx, sy);
+      first = false;
+    } else {
+      ctx.lineTo(sx, sy);
+    }
+  }
+
+  ctx.stroke();
+}
+
+function plot() {
+  const expr = document.getElementById("expression").value;
+  const win = {
+    xmin: parseFloat(document.getElementById("xmin").value),
+    xmax: parseFloat(document.getElementById("xmax").value),
+    ymin: parseFloat(document.getElementById("ymin").value),
+    ymax: parseFloat(document.getElementById("ymax").value)
+  };
+
+  const fn = createEvaluator(expr);
+
+  drawGrid(win);
+  drawFunction(fn, win);
+
+  document.getElementById("status").querySelector("span").textContent =
+    "Plotted: " + expr;
+}
+
+document.getElementById("plotBtn").onclick = plot;
+
+document.getElementById("resetBtn").onclick = () => {
+  document.getElementById("xmin").value = -10;
+  document.getElementById("xmax").value = 10;
+  document.getElementById("ymin").value = -5;
+  document.getElementById("ymax").value = 5;
+  plot();
+};
+
+canvas.addEventListener("mousemove", e => {
+  const rect = canvas.getBoundingClientRect();
+  const sx = e.clientX - rect.left;
+  const sy = e.clientY - rect.top;
+
+  const win = {
+    xmin: parseFloat(document.getElementById("xmin").value),
+    xmax: parseFloat(document.getElementById("xmax").value),
+    ymin: parseFloat(document.getElementById("ymin").value),
+    ymax: parseFloat(document.getElementById("ymax").value)
+  };
+
+  const x = win.xmin + (sx / canvas.width) * (win.xmax - win.xmin);
+  const y = win.ymin + ((canvas.height - sy) / canvas.height) * (win.ymax - win.ymin);
+
+  document.getElementById("coords").textContent =
+    `x: ${x.toFixed(3)}, y: ${y.toFixed(3)}`;
+});
+
+plot();
