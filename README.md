@@ -1,4 +1,4 @@
-# Web-Based Interactive Arithmetic Calculator
+# Operational Graphing Calculator
 
 A responsive, browser‑based graphing calculator built with HTML, CSS, and JavaScript.
 It supports real‑time mathematical expression parsing and renders smooth, accurate graphs using the HTML5 Canvas API.
