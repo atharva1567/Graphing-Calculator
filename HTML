@@ -1,0 +1,42 @@
+<div class="app">
+  <div class="sidebar">
+    <div class="title">
+      <div class="title-main">
+        <span class="icon">ƒ</span>
+        <span>Graphing Calculator</span>
+      </div>
+      <div class="title-pill">JS · Canvas</div>
+    </div>
+
+    <div class="input-group">
+      <div class="expression-input">
+        <span class="y-label">y =</span>
+        <input id="expression" type="text" placeholder="sin(x)" value="sin(x)" />
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>X min</label>
+      <input id="xmin" type="number" value="-10" />
+      <label>X max</label>
+      <input id="xmax" type="number" value="10" />
+      <label>Y min</label>
+      <input id="ymin" type="number" value="-5" />
+      <label>Y max</label>
+      <input id="ymax" type="number" value="5" />
+    </div>
+
+    <button id="plotBtn" class="primary">Plot</button>
+    <button id="resetBtn" class="secondary">Reset</button>
+
+    <div id="status" class="status">
+      <div class="status-dot"></div>
+      <span>Ready</span>
+    </div>
+  </div>
+
+  <div class="right">
+    <canvas id="graph" width="900" height="520"></canvas>
+    <div id="coords" class="coords">x: —, y: —</div>
+  </div>
+</div>
